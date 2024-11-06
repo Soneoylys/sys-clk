@@ -1,0 +1,25 @@
+name: libnx_build
+
+on:
+  push:
+  pull_request:
+  repository_dispatch:
+    types: [run_build]
+
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: devkitpro/devkita64
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: package
+      run: ./build.sh
+
+    - uses: actions/upload-artifact@v3
+      with:
+        path: dist/
