@@ -31,9 +31,13 @@
 
 extern uint32_t g_freq_table_hz[SysClkModule_EnumMax][SYSCLK_FREQ_LIST_MAX+1];
 
+
+
 Result cacheFreqList();
 std::string formatListItemTitle(const std::string str, size_t maxScore = 140);
 brls::SelectListItem* createFreqListItem(SysClkModule module, uint32_t selectedFreqInMHz, std::string defaultString = "Do not override");
+
+brls::SelectListItem* createProfileListItem(std::string name, uint32_t selectedProfile, std::string defaultString = "Do not override");
 
 std::string formatFreq(uint32_t freq);
 std::string formatTid(uint64_t tid);

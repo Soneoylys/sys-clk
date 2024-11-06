@@ -23,6 +23,10 @@ source_files = files(
     'src/about_tab.cpp'
 )
 
+common_files = files(
+    '../common/src/clock_table.c'
+)
+
 ipc_files = files(
     'src/ipc/pc_shim/client.cpp',
     'src/ipc/pc_shim/ns.cpp'

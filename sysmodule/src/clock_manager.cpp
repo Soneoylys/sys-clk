@@ -8,6 +8,7 @@
  * --------------------------------------------------------------------------
  */
 
+#include "errors.h"
 #include "clock_manager.h"
 #include <cstring>
 #include "file_utils.h"
@@ -56,6 +57,30 @@ Config* ClockManager::GetConfig()
 void ClockManager::SetRunning(bool running)
 {
     this->running = running;
+}
+
+bool ClockManager::IsCpuBoostMode()
+{
+    std::uint32_t confId = 0;
+    Result rc = 0;
+    rc = apmExtGetCurrentPerformanceConfiguration(&confId);
+    ASSERT_RESULT_OK(rc, "apmExtGetCurrentPerformanceConfiguration");
+    if(confId == 0x92220009 || confId == 0x9222000A)
+        return true;
+    else
+        return false;
+}
+
+bool ClockManager::IsGpuThrottleMode()
+{
+    std::uint32_t confId = 0;
+    Result rc = 0;
+    rc = apmExtGetCurrentPerformanceConfiguration(&confId);
+    ASSERT_RESULT_OK(rc, "apmExtGetCurrentPerformanceConfiguration");
+    if(confId == 0x92220009 || confId == 0x9222000A || confId == 0x9222000B || confId == 0x9222000C)
+        return true;
+    else
+        return false;
 }
 
 bool ClockManager::Running()
@@ -170,8 +195,20 @@ void ClockManager::RefreshFreqTableRow(SysClkModule module)
 void ClockManager::Tick()
 {
     std::scoped_lock lock{this->contextMutex};
-    if (this->RefreshContext() || this->config->Refresh())
+    bool configRefreshed = this->config->Refresh();
+    
+    if (this->RefreshContext() || configRefreshed)
     {
+        // reset clocks after config change, otherwise choosing do not override  for cpu/gpu/mem will not reset clocks to stock properly
+        if(configRefreshed)
+        {
+            Board::ResetToStock();
+        }
+
+        std::uint32_t ug = 0;
+        std::uint32_t ogb = 0;
+        std::uint32_t ocb = 0;
+        
         std::uint32_t targetHz = 0;
         std::uint32_t maxHz = 0;
         std::uint32_t nearestHz = 0;
@@ -183,13 +220,34 @@ void ClockManager::Tick()
             {
                 targetHz = this->config->GetAutoClockHz(this->context->applicationId, (SysClkModule)module, this->context->profile);
             }
+            
+            // Global default profile for applications without an application specific profile
+            if(!targetHz)
+            {
+                targetHz = this->config->GetAutoClockHz(9999999999999999, (SysClkModule)module, this->context->profile);
+            }
 
             if (targetHz)
             {
-                maxHz = this->GetMaxAllowedHz((SysClkModule)module, this->context->profile);
+                
+                ug = this->GetConfig()->GetConfigValue(SysClkConfigValue_UncappedGPUEnabled);
+                
+                if (1 == ug)
+                {
+                    maxHz = this->GetMaxAllowedHz((SysClkModule)module, SysClkProfile_HandheldChargingOfficial);
+                }
+                else
+                {
+                    maxHz = this->GetMaxAllowedHz((SysClkModule)module, this->context->profile);
+                }
                 nearestHz = this->GetNearestHz((SysClkModule)module, targetHz, maxHz);
+                
+                // BOOST MODE override: let boost mode do its job and then return back to sys/custom values
+                
+                ogb = 1;
+                ocb = 1;
 
-                if (nearestHz != this->context->freqs[module] && this->context->enabled)
+                if ((( ((ocb == 0) || (!IsCpuBoostMode())) && module == 0) || ( ((ogb == 0) || (!IsGpuThrottleMode())) && module == 1) || (!(nearestHz == 1600000000 && this->context->freqs[module] > 1600000000) && module == 2)) && nearestHz != this->context->freqs[module] && this->context->enabled)
                 {
                     FileUtils::LogLine(
                         "[mgr] %s clock set : %u.%u MHz (target = %u.%u MHz)",
@@ -232,6 +290,19 @@ bool ClockManager::RefreshContext()
     }
 
     SysClkProfile profile = Board::GetProfile();
+    
+    //choose profile
+    std::uint32_t fp = this->GetConfig()->GetConfigValue(SysClkConfigValue_FakeProfileModeEnabled);
+    
+    if (0 != fp)
+    {
+        if(profile < (SysClkProfile)fp)
+        {
+            profile =  (SysClkProfile)fp;
+            
+        }
+    }
+    
     if (profile != this->context->profile)
     {
         FileUtils::LogLine("[mgr] Profile change: %s", Board::GetProfileName(profile, true));
@@ -258,6 +329,19 @@ bool ClockManager::RefreshContext()
         }
 
         hz = this->GetConfig()->GetOverrideHz((SysClkModule)module);
+        
+        // Override MEM to MAX (1600 or higher if using loader.kip or own patched version of atmosphere)
+        if (module == 2)
+        {
+            std::uint32_t om = this->GetConfig()->GetConfigValue(SysClkConfigValue_OverrideMEMEnabled);
+            
+            if (1 == om)
+            {
+                hz = Board::GetMaxMemFreq();
+            }
+
+        }
+        
         if (hz != this->context->overrideFreqs[module])
         {
             if(hz)
@@ -267,6 +351,7 @@ bool ClockManager::RefreshContext()
             else
             {
                 FileUtils::LogLine("[mgr] %s override disabled", Board::GetModuleName((SysClkModule)module, true));
+                Board::ResetToStock();
             }
             this->context->overrideFreqs[module] = hz;
             hasChanged = true;

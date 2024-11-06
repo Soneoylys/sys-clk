@@ -16,6 +16,9 @@
 class Board
 {
   public:
+    static inline std::uint32_t maxMemFreq = 1600000000;
+    static bool GetIsMariko() { return isMariko; };
+    static std::uint32_t GetMaxMemFreq();
     static const char* GetProfileName(SysClkProfile profile, bool pretty);
     static const char* GetModuleName(SysClkModule module, bool pretty);
     static const char* GetThermalSensorName(SysClkThermalSensor sensor, bool pretty);
@@ -34,6 +37,7 @@ class Board
     static SysClkSocType GetSocType();
 
   protected:
+    static inline bool isMariko;
     static void FetchHardwareInfos();
     static PcvModule GetPcvModule(SysClkModule sysclkModule);
     static PcvModuleId GetPcvModuleId(SysClkModule sysclkModule);

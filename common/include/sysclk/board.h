@@ -31,6 +31,8 @@ typedef enum
     SysClkProfile_EnumMax
 } SysClkProfile;
 
+extern uint32_t sysclk_g_profile_table[];
+
 typedef enum
 {
     SysClkModule_CPU = 0,
@@ -60,6 +62,7 @@ typedef enum
     SysClkRamLoad_Cpu,
     SysClkRamLoad_EnumMax
 } SysClkRamLoad;
+
 
 #define SYSCLK_ENUM_VALID(n, v) ((v) < n##_EnumMax)
 

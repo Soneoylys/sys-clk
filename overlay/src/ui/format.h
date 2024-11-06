@@ -25,4 +25,15 @@ static inline std::string formatListFreqMHz(std::uint32_t mhz)
     return std::string(buf, snprintf(buf, sizeof(buf), "%u MHz", mhz));
 }
 
+static inline std::string formatListProfile(std::uint32_t profile)
+{
+    if(profile == 0)
+    {
+        return FREQ_DEFAULT_TEXT;
+    }
+
+    return sysclkFormatProfile((SysClkProfile)profile,true);
+}
+
 static inline std::string formatListFreqHz(std::uint32_t hz) { return formatListFreqMHz(hz / 1000000); }
+

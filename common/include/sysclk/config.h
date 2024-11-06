@@ -19,6 +19,9 @@ typedef enum {
     SysClkConfigValue_FreqLogIntervalMs,
     SysClkConfigValue_PowerLogIntervalMs,
     SysClkConfigValue_CsvWriteIntervalMs,
+    SysClkConfigValue_UncappedGPUEnabled,
+    SysClkConfigValue_OverrideMEMEnabled,
+    SysClkConfigValue_FakeProfileModeEnabled,
     SysClkConfigValue_EnumMax,
 } SysClkConfigValue;
 
@@ -40,6 +43,12 @@ static inline const char* sysclkFormatConfigValue(SysClkConfigValue val, bool pr
             return pretty ? "Power logging interval (ms)" : "power_log_interval_ms";
         case SysClkConfigValue_CsvWriteIntervalMs:
             return pretty ? "CSV write interval (ms)" : "csv_write_interval_ms";
+        case SysClkConfigValue_UncappedGPUEnabled:
+            return pretty ? "Uncapped GPU (does not change profile)" : "uncapped_gpu_enabled";
+        case SysClkConfigValue_OverrideMEMEnabled:
+            return pretty ? "Override MEM to MAX (1600 MHz or higher)" : "override_mem_enabled";
+        case SysClkConfigValue_FakeProfileModeEnabled:
+            return pretty ? "Minimum profile (spoof profile)" : "fake_profile_mode_enabled";
         default:
             return NULL;
     }
@@ -55,6 +64,9 @@ static inline uint64_t sysclkDefaultConfigValue(SysClkConfigValue val)
         case SysClkConfigValue_FreqLogIntervalMs:
         case SysClkConfigValue_PowerLogIntervalMs:
         case SysClkConfigValue_CsvWriteIntervalMs:
+        case SysClkConfigValue_UncappedGPUEnabled:
+        case SysClkConfigValue_OverrideMEMEnabled:
+        case SysClkConfigValue_FakeProfileModeEnabled:
             return 0ULL;
         default:
             return 0ULL;
@@ -67,6 +79,11 @@ static inline uint64_t sysclkValidConfigValue(SysClkConfigValue val, uint64_t in
     {
         case SysClkConfigValue_PollingIntervalMs:
             return input > 0;
+        case SysClkConfigValue_UncappedGPUEnabled:
+        case SysClkConfigValue_OverrideMEMEnabled:
+            return (input == 0 || input == 1);
+        case SysClkConfigValue_FakeProfileModeEnabled:
+            return (input >=  0 && input < 5);
         case SysClkConfigValue_TempLogIntervalMs:
         case SysClkConfigValue_FreqLogIntervalMs:
         case SysClkConfigValue_PowerLogIntervalMs:

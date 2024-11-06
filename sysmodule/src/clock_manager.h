@@ -22,6 +22,8 @@ class ClockManager
   public:
     ClockManager();
     virtual ~ClockManager();
+    bool IsCpuBoostMode();
+    bool IsGpuThrottleMode();
 
     SysClkContext GetCurrentContext();
     Config* GetConfig();

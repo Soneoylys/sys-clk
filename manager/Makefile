@@ -54,7 +54,7 @@ APP_RESOURCES		:=	romfs:/
 #---------------------------------------------------------------------------------
 # version control constants
 #---------------------------------------------------------------------------------
-TARGET_VERSION	:= $(shell git describe --dirty --always --tags)
+TARGET_VERSION	:= $(shell git describe --tags)
 APP_VERSION		:= $(TARGET_VERSION)
 
 #---------------------------------------------------------------------------------
@@ -180,8 +180,8 @@ all: $(BUILD)
 $(ROMFS):
 	@[ -d $@ ] || mkdir -p $@
 	@echo Merging ROMFS...
-	@cp -ruf $(CURDIR)/$(BOREALIS_PATH)/resources/. $(CURDIR)/$(ROMFS)/borealis/
-	@cp -ruf $(CURDIR)/$(RESOURCES)/. $(CURDIR)/$(ROMFS)/
+	@cp -rf $(CURDIR)/$(BOREALIS_PATH)/resources/. $(CURDIR)/$(ROMFS)/borealis/
+	@cp -rf $(CURDIR)/$(RESOURCES)/. $(CURDIR)/$(ROMFS)/
 
 $(BUILD): $(ROMFS)
 	@[ -d $@ ] || mkdir -p $@

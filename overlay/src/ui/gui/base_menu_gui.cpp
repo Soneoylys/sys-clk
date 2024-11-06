@@ -33,6 +33,7 @@ void BaseMenuGui::preDraw(tsl::gfx::Renderer* renderer)
     if(this->context)
     {
         char buf[32];
+
         std::uint32_t y = 85;
 
         renderer->drawString("App ID: ", false, 20, y, SMALL_TEXT_SIZE, DESC_COLOR);
@@ -57,6 +58,7 @@ void BaseMenuGui::preDraw(tsl::gfx::Renderer* renderer)
         for(unsigned int i = 0; i < SysClkModule_EnumMax; i++)
         {
             std::uint32_t hz = this->context->freqs[freqOffsets[i].m];
+
             snprintf(buf, sizeof(buf), "%u.%u MHz", hz / 1000000, hz / 100000 - hz / 1000000 * 10);
             renderer->drawString(buf, false, freqOffsets[i].x, y, SMALL_TEXT_SIZE, VALUE_COLOR);
         }
@@ -88,10 +90,12 @@ void BaseMenuGui::preDraw(tsl::gfx::Renderer* renderer)
         renderer->drawString("SOC:", false, 20, y, SMALL_TEXT_SIZE, DESC_COLOR);
         renderer->drawString("PCB:", false, 166, y, SMALL_TEXT_SIZE, DESC_COLOR);
         renderer->drawString("Skin:", false, 303, y, SMALL_TEXT_SIZE, DESC_COLOR);
+
         for(unsigned int i = 0; i < SysClkModule_EnumMax; i++)
         {
             std::uint32_t millis = this->context->temps[tempOffsets[i].s];
             snprintf(buf, sizeof(buf), "%u.%u °C", millis / 1000, (millis - millis / 1000 * 1000) / 100);
+
             renderer->drawString(buf, false, tempOffsets[i].x, y, SMALL_TEXT_SIZE, VALUE_COLOR);
         }
 
@@ -115,6 +119,7 @@ void BaseMenuGui::preDraw(tsl::gfx::Renderer* renderer)
             std::uint32_t mw = this->context->power[powerOffsets[i].s];
             snprintf(buf, sizeof(buf), "%d mW", mw);
             renderer->drawString(buf, false, powerOffsets[i].x, y, SMALL_TEXT_SIZE, VALUE_COLOR);
+
         }
     }
 }

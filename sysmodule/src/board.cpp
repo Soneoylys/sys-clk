@@ -11,6 +11,7 @@
 #include <nxExt.h>
 #include "board.h"
 #include "errors.h"
+#include "file_utils.h"
 
 #define HOSSVC_HAS_CLKRST (hosversionAtLeast(8,0,0))
 #define HOSSVC_HAS_TC (hosversionAtLeast(5,0,0))
@@ -70,6 +71,29 @@ PcvModuleId Board::GetPcvModuleId(SysClkModule sysclkModule)
 void Board::Initialize()
 {
     Result rc = 0;
+    
+    u64 hardware_type = 0;
+    rc = splInitialize();
+    ASSERT_RESULT_OK(rc, "splInitialize");
+    rc = splGetConfig(SplConfigItem_HardwareType, &hardware_type);
+    ASSERT_RESULT_OK(rc, "splGetConfig");
+    splExit();
+
+    switch (hardware_type) {
+        case 0: // Icosa
+        case 1: // Copper
+            isMariko = false;
+            break;
+        case 2: // Hoag
+        case 3: // Iowa
+        case 4: // Calcio
+        case 5: // Aula
+            isMariko = true;
+            break;
+        default:
+            ERROR_THROW("Unknown hardware type: 0x%X!", hardware_type);
+            return;
+    }
 
     if(HOSSVC_HAS_CLKRST)
     {
@@ -93,6 +117,8 @@ void Board::Initialize()
         rc = tcInitialize();
         ASSERT_RESULT_OK(rc, "tcInitialize");
     }
+    
+    FileUtils::ParseLoaderKip();
 
     rc = max17050Initialize();
     ASSERT_RESULT_OK(rc, "max17050Initialize");
@@ -101,6 +127,7 @@ void Board::Initialize()
     ASSERT_RESULT_OK(rc, "tmp451Initialize");
 
     FetchHardwareInfos();
+
 }
 
 void Board::Exit()
@@ -175,6 +202,11 @@ void Board::SetHz(SysClkModule module, std::uint32_t hz)
         rc = pcvSetClockRate(Board::GetPcvModule(module), hz);
         ASSERT_RESULT_OK(rc, "pcvSetClockRate");
     }
+}
+
+std::uint32_t Board::GetMaxMemFreq()
+{
+    return maxMemFreq;
 }
 
 std::uint32_t Board::GetHz(SysClkModule module)
