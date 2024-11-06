@@ -17,13 +17,11 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: parse
-      run: echo "::set-output name=commit_hash::$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-
     - name: package
       run: ./build.sh
 
     - uses: actions/upload-artifact@v3
       with:
-        path: dist/**/*
-        name: libnx_build_${{ env.commit_hash }}
+        path: dist/
+        name: sys-clk-nightly
+        include-hidden-files: true
