@@ -30,7 +30,16 @@ LIBNAMES	:=	minIni nxExt
 #---------------------------------------------------------------------------------
 # version control constants
 #---------------------------------------------------------------------------------
-TARGET_VERSION	:= $(shell git describe --tags || git rev-parse --short HEAD || nightly)
+TAG_VERSION := $(shell git describe --tags 2>/dev/null)
+
+ifeq ($(TAG_VERSION),)
+  TARGET_VERSION := $(shell git rev-parse --short HEAD 2>/dev/null)
+  ifeq ($(TARGET_VERSION),)
+    TARGET_VERSION := nightly
+  endif
+else
+  TARGET_VERSION := $(TAG_VERSION)
+endif
 
 #---------------------------------------------------------------------------------
 # options for code generation

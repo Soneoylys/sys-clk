@@ -32,8 +32,18 @@ NO_ICON		:=	1
 #---------------------------------------------------------------------------------
 # version control constants
 #---------------------------------------------------------------------------------
-TARGET_VERSION	:= $(shell git describe --tags || git rev-parse --short HEAD || nightly)
-APP_VERSION		:= $(TARGET_VERSION)
+TAG_VERSION := $(shell git describe --dirty --always --tags 2>/dev/null)
+
+ifeq ($(TAG_VERSION),)
+  TARGET_VERSION := $(shell git rev-parse --short HEAD 2>/dev/null)
+  ifeq ($(TARGET_VERSION),)
+    TARGET_VERSION := nightly
+  endif
+else
+  TARGET_VERSION := $(TAG_VERSION)
+endif
+
+APP_VERSION := $(TARGET_VERSION)
 
 #---------------------------------------------------------------------------------
 # options for code generation
