@@ -18,11 +18,11 @@
     2. It's meant for people who have higher clocks in charging profiles and sometimes want to activate those profiles without a charger (e.g. choosing 'Official Charger' will ensure that your device's profile will remain at least at 'Official Charger' even if in reality your device is in handheld). 
     3. Chosen minimum profile won't downgrade your real profile if the real profile is higher than the minimum profile (e.g. when docked choosing 'Charging' doesn't do anything (you are already at a higher profile)).
     4. Possible values:
-    `Do not override`,
-    `Charging`,
-    `USB Charger`,
-    `Official Charger` or
-    `Docked`.
+    `Do not override(0)`,
+    `Charging(1)`,
+    `USB Charger(2)`,
+    `Official Charger(3)` or
+    `Docked(4)`.
     
 * Set CPU to 1785 MHz during boost
     1. Let boost mode override sys-clk value set for CPU during boost mode with the default 1785 MHz.
@@ -143,17 +143,41 @@ handheld_gpu=153
 handheld_mem=800
 ```
 
+### Example 3: Global default
+
+* Set global default for all processes (e.g. value for erista)
+```
+[002386F26FC0FFFF]
+handheld_cpu=1224
+handheld_gpu=460
+handheld_mem=1600
+handheld_charging_cpu=1683
+handheld_charging_gpu=768
+handheld_charging_mem=1600
+handheld_charging_usb_cpu=1428
+handheld_charging_usb_gpu=614
+handheld_charging_usb_mem=1600
+handheld_charging_official_cpu=1785
+handheld_charging_official_gpu=921
+handheld_charging_official_mem=1600
+docked_cpu=1785
+docked_gpu=921
+docked_mem=1600
+```
 ### Advanced
 
 The `[values]` section allows you to alter timings in sys-clk, you should not need to edit any of these unless you know what you are doing. Possible values are:
 
-| Key                     | Desc                                                                          | Default |
-|:-----------------------:|-------------------------------------------------------------------------------|:-------:|
-|**temp_log_interval_ms** | Defines how often sys-clk logs temperatures, in milliseconds (`0` to disable) | 0 ms    |
-|**freq_log_interval_ms** | Defines how often sys-clk logs real freqs, in milliseconds (`0` to disable)   | 0 ms    |
-|**power_log_interval_ms**| Defines how often sys-clk logs power usage, in milliseconds (`0` to disable)  | 0 ms    |
-|**csv_write_interval_ms**| Defines how often sys-clk writes to the CSV, in milliseconds (`0` to disable) | 0 ms    |
-|**poll_interval_ms**     | Defines how fast sys-clk checks and applies profiles, in milliseconds         | 300 ms  |
+| Key                         | Desc                                                                          | Default |
+|:---------------------------:|-------------------------------------------------------------------------------|:-------:|
+|**temp_log_interval_ms**     | Defines how often sys-clk logs temperatures, in milliseconds (`0` to disable) | 0 ms    |
+|**freq_log_interval_ms**     | Defines how often sys-clk logs real freqs, in milliseconds (`0` to disable)   | 0 ms    |
+|**power_log_interval_ms**    | Defines how often sys-clk logs power usage, in milliseconds (`0` to disable)  | 0 ms    |
+|**csv_write_interval_ms**    | Defines how often sys-clk writes to the CSV, in milliseconds (`0` to disable) | 0 ms    |
+|**poll_interval_ms**         | Defines how fast sys-clk checks and applies profiles, in milliseconds         | 300 ms  |
+|**uncapped_gpu_enabled**     | Ignore GPU clock speed limitations (`0` to disable)                           | 0 (OFF) |
+|**override_mem_enabled**     | Force memory speed to maximum kernel allowed (`0` to disable)                 | 0 (OFF) |
+|**fake_profile_mode_enabled**| Spoof device profile for sys-clk (`0-4`, check "Minimum profile")             | 0 (OFF) |
 
 
 ## Capping
@@ -195,11 +219,11 @@ To protect the battery from excessive strain, clocks requested from config may b
 * 844
 * 768 → official docked
 * 691
-* 614
+* 614 → max handheld (mariko)
 * 537
-* 460 → max handheld
-* 384 → official handheld
-* 307 → official handheld
+* 460 → max handheld (erista)
+* 384 → official handheld (mariko)
+* 307 → official handheld (erista)
 * 230
 * 153
 * 76 → boost mode
@@ -207,3 +231,4 @@ To protect the battery from excessive strain, clocks requested from config may b
 **Notes:**
 1. GPU overclock is capped at 460MHz in handheld and capped at 768MHz if charging, unless you're using the official charger.
 2. Clocks higher than 768MHz need the official charger is plugged in.
+3. Draw over 12W from battery will result shutdown due to PMIC limitations (non-lite variants)

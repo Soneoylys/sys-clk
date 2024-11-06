@@ -3,6 +3,12 @@
 temp_log_interval_ms=0
 ; Defines how often sys-clk writes to the CSV, in milliseconds (set 0 to disable)
 csv_write_interval_ms=0
+; Ignore GPU clock speed limitations
+uncapped_gpu_enabled=0
+; Force memory speed to maximum kernel allowed
+override_mem_enabled=0
+; Spoof device profile for sys-clk (0-4)
+fake_profile_mode_enabled=0
 
 ; Example #1: BOTW
 ; Overclock CPU when docked
@@ -17,3 +23,22 @@ csv_write_interval_ms=0
 ;handheld_cpu=816
 ;handheld_gpu=153
 ;handheld_mem=800
+
+; Example #3: Global default
+; Set global default for all processes (e.g. value for erista)
+;[002386F26FC0FFFF]
+;handheld_cpu=1224
+;handheld_gpu=460
+;handheld_mem=1600
+;handheld_charging_cpu=1683
+;handheld_charging_gpu=768
+;handheld_charging_mem=1600
+;handheld_charging_usb_cpu=1428
+;handheld_charging_usb_gpu=614
+;handheld_charging_usb_mem=1600
+;handheld_charging_official_cpu=1785
+;handheld_charging_official_gpu=921
+;handheld_charging_official_mem=1600
+;docked_cpu=1785
+;docked_gpu=921
+;docked_mem=1600
